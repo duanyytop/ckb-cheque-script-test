@@ -1,6 +1,6 @@
 # ckb-cheque-test
 
-The test for the [ckb-cheque-test](https://github.com/duanyytop/ckb-cheque-script) on Nervos CKB
+The test for the [ckb-cheque-script](https://github.com/duanyytop/ckb-cheque-script) on Nervos CKB
 
 ### How to Work
 
