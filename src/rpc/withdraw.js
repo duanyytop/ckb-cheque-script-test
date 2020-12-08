@@ -1,4 +1,5 @@
 const CKB = require('@nervosnetwork/ckb-sdk-core').default
+const { scriptToHash, rawTransactionToHash } = require('@nervosnetwork/ckb-sdk-utils')
 const {
   secp256k1LockScript,
   secp256k1Dep,
@@ -66,14 +67,14 @@ const createWithdrawChequeCell = async () => {
 }
 
 const withdrawChequeCell = async () => {
-  const { senderLockArgs, senderPrivateKey } = await senderLockInfo()
+  const { senderLockArgs, senderPrivateKey, senderLockScript } = await senderLockInfo()
   const chequeLockScript = await chequeLockInfo(true)
 
   const liveCells = await getCells(await secp256k1LockScript(senderLockArgs))
-  const { inputs, capacity } = collectInputs(liveCells, CHEQUE_CELL_CAPACITY, CHEQUE_SINCE)
+  const { inputs, capacity } = collectInputs(liveCells, CHEQUE_CELL_CAPACITY, '0x0')
 
   const chequeLiveCells = await getCells(chequeLockScript)
-  const { inputs: chequeInputs, capacity: chequeCapacity } = collectInputsWithoutFee(chequeLiveCells, CHEQUE_CELL_CAPACITY, '0x0')
+  const { inputs: chequeInputs, capacity: chequeCapacity } = collectInputsWithoutFee(chequeLiveCells, CHEQUE_CELL_CAPACITY, CHEQUE_SINCE)
 
   const outputs = await generateWithdrawOutputs(capacity, chequeCapacity)
   const cellDeps = [await secp256k1Dep(), ChequeDep]
@@ -86,7 +87,21 @@ const withdrawChequeCell = async () => {
     outputsData: ['0x'],
   }
   rawTx.witnesses = rawTx.inputs.map((_, i) => (i > 0 ? '0x' : { lock: '', inputType: '', outputType: '' }))
-  const signedTx = ckb.signTransaction(senderPrivateKey)(rawTx)
+  const keys = new Map()
+  keys.set(scriptToHash(senderLockScript), senderPrivateKey)
+  keys.set(scriptToHash(chequeLockScript), null)
+  const signedWitnesses = ckb.signWitnesses(keys)({
+    transactionHash: rawTransactionToHash(rawTx),
+    witnesses: rawTx.witnesses,
+    inputCells: rawTx.inputs.map((input, index) => {
+      return {
+        outPoint: input.previousOutput,
+        lock: index === 0 ? senderLockScript : chequeLockScript,
+      }
+    }),
+    skipMissingKeys: true,
+  })
+  const signedTx = { ...rawTx, witnesses: signedWitnesses }
   const txHash = await ckb.rpc.sendTransaction(signedTx)
   console.info(`Withdraw cheque cell tx has been sent with tx hash ${txHash}`)
   return txHash
