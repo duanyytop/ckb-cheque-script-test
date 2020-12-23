@@ -17,9 +17,9 @@ const ckb = new CKB(CKB_NODE_RPC)
 const FEE = BigInt(1000)
 const CHEQUE_CELL_CAPACITY = BigInt(200) * BigInt(100000000)
 
-const generateChequeOutputs = async (inputCapacity, isReceiverArgs) => {
+const generateChequeOutputs = async inputCapacity => {
   const { senderLockScript } = await senderLockInfo()
-  const chequeLockScript = await chequeLockInfo(isReceiverArgs)
+  const chequeLockScript = await chequeLockInfo()
   let outputs = [
     {
       capacity: `0x${CHEQUE_CELL_CAPACITY.toString(16)}`,
@@ -50,11 +50,11 @@ const generateClaimOutputs = async (inputCapacity, chequeInputCapacity) => {
   return outputs
 }
 
-const createChequeCell = async isReceiverArgs => {
+const createChequeCell = async () => {
   const { senderLockScript, senderPrivateKey } = await senderLockInfo()
   const liveCells = await getCells(senderLockScript)
   const { inputs, capacity } = collectInputs(liveCells, CHEQUE_CELL_CAPACITY, '0x0')
-  const outputs = await generateChequeOutputs(capacity, isReceiverArgs)
+  const outputs = await generateChequeOutputs(capacity)
   const cellDeps = [await secp256k1Dep()]
   const rawTx = {
     version: '0x0',
@@ -73,7 +73,7 @@ const createChequeCell = async isReceiverArgs => {
 
 const claimChequeWithSignature = async () => {
   const { receiverPrivateKey, receiverLockArgs, receiverLockScript } = await receiverLockInfo()
-  const chequeLockScript = await chequeLockInfo(true)
+  const chequeLockScript = await chequeLockInfo()
   const liveCells = await getCells(await secp256k1LockScript(receiverLockArgs))
   const { inputs, capacity } = collectInputs(liveCells, CHEQUE_CELL_CAPACITY, '0x0')
   const chequeLiveCells = await getCells(chequeLockScript)
@@ -111,7 +111,7 @@ const claimChequeWithSignature = async () => {
 
 const claimChequeWithInputs = async () => {
   const { receiverPrivateKey, receiverLockArgs, receiverLockScript } = await receiverLockInfo()
-  const chequeLockScript = await chequeLockInfo(false)
+  const chequeLockScript = await chequeLockInfo()
 
   const liveCells = await getCells(await secp256k1LockScript(receiverLockArgs))
   const { inputs, capacity } = collectInputs(liveCells, CHEQUE_CELL_CAPACITY, '0x0')

@@ -1,11 +1,11 @@
 const ChequeLockScript = {
-  codeHash: '0x54e3959274bccfffcd5e0235d70ac5f6c3b50463adfc101db3686525368b19c6',
+  codeHash: '0x9f27f3afc8d26dfa8bc0c8fa21bc033ddcdab6ad83d5e865cdd6d5d0b3b95642',
   hashType: 'type',
   args: '',
 }
 
 const ChequeDep = {
-  outPoint: { txHash: '0x67cbe9bba0b40e06e6381c78b9a477797a80de177574fd96453f3c0e1eb60bf8', index: '0x0' },
+  outPoint: { txHash: '0x1dbbeac82db9a330ed07dd33e547facbca14378196f0e2d69ad8e83bce1d5f54', index: '0x0' },
   depType: 'depGroup',
 }
 

@@ -2,7 +2,6 @@ const fetch = require('node-fetch')
 const CKB = require('@nervosnetwork/ckb-sdk-core').default
 const { scriptToHash } = require('@nervosnetwork/ckb-sdk-utils')
 const { CKB_NODE_RPC, CKB_NODE_INDEXER, SENDER_PRIVATE_KEY, RECEIVER_PRIVATE_KEY } = require('../utils/config')
-const { remove0x } = require('../utils/hex')
 const { ChequeLockScript } = require('../utils/const')
 
 const ckb = new CKB(CKB_NODE_RPC)
@@ -52,12 +51,10 @@ const receiverLockInfo = async () => {
   }
 }
 
-const chequeLockInfo = async isReceiverArgs => {
-  const { senderLockHash } = await senderLockInfo()
-  const { receiverLockArgs, receiverLockHash } = await receiverLockInfo()
-
-  const receiver = isReceiverArgs ? remove0x(receiverLockArgs) : receiverLockHash.substring(2, 42)
-  const chequeLockArgs = `0x${receiver}${senderLockHash.substring(2, 42)}`
+const chequeLockInfo = async () => {
+  const { senderLockHash, senderLockScript } = await senderLockInfo()
+  const { receiverLockHash } = await receiverLockInfo()
+  const chequeLockArgs = `0x${receiverLockHash.substring(2, 42)}${senderLockHash.substring(2, 42)}`
   const chequeLock = { ...ChequeLockScript, args: chequeLockArgs }
   return chequeLock
 }

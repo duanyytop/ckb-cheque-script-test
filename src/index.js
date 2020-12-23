@@ -1,27 +1,35 @@
 const { createChequeCell, claimChequeWithSignature, claimChequeWithInputs } = require('./rpc/claim')
-const { createWithdrawChequeCell, withdrawChequeCell } = require('./rpc/withdraw')
+const { withdrawChequeCellWithInputs, withdrawChequeWithSignature } = require('./rpc/withdraw')
 
 const doClaimingCellWithSignature = async () => {
-  await createChequeCell(true)
+  await createChequeCell()
   setTimeout(async () => {
     await claimChequeWithSignature()
   }, 20000)
 }
 
 const doClaimingCellWithInputs = async () => {
-  await createChequeCell(false)
+  await createChequeCell()
   setTimeout(async () => {
     await claimChequeWithInputs()
   }, 20000)
 }
 
-const doWithdrawingCell = async () => {
-  await createWithdrawChequeCell()
+const doWithdrawingCellWithSignature = async () => {
+  await createChequeCell()
   setTimeout(async () => {
-    await withdrawChequeCell()
+    await withdrawChequeWithSignature()
   }, 20000)
 }
 
-doClaimingCellWithSignature()
+const doWithdrawingCellWithInputs = async () => {
+  // await createChequeCell()
+  // setTimeout(async () => {
+  await withdrawChequeCellWithInputs()
+  // }, 20000)
+}
+
+// doClaimingCellWithSignature()
 // doClaimingCellWithInputs()
-// doWithdrawingCell()
+// doWithdrawingCellWithSignature()
+doWithdrawingCellWithInputs()
